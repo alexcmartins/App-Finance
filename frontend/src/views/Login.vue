@@ -3,8 +3,8 @@
     <div class="bg-white p-6 rounded shadow-md w-96">
       <h2 class="text-xl font-semibold text-center mb-4">Login</h2>
       <form @submit.prevent="login">
-        <input v-model="username" type="text" placeholder="Usuário" class="w-full p-2 border rounded mb-2" required />
-        <input v-model="password" type="password" placeholder="Senha" class="w-full p-2 border rounded mb-4" required />
+        <input v-model="username" type="text" placeholder="Usuário" class="w-full p-2 border rounded mb-3" required />
+        <input v-model="password" type="password" placeholder="Senha" class="w-full p-2 border rounded mb-3" required />
         <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
           Entrar
         </button>
@@ -43,12 +43,15 @@ export default {
           throw new Error(data.error || 'Erro ao fazer login');
         }
 
+        //window.location.reload(); 
+
         // Atualiza o estado do usuário no Pinia
         const userStore = useUserStore();
         userStore.setUser(data.username, data.token);
 
         //localStorage.setItem('token', data.token); // Apenas o token fica salvo
         this.$router.push('/dashboard'); // Redireciona para o Dashboard
+        
       } catch (err) {
         this.error = err.message;
       }

@@ -18,6 +18,7 @@ export const useUserStore = defineStore("user", {
       this.username = null;
       this.token = null;
       localStorage.removeItem("token");
+      window.location.reload();
     }
   }
 });

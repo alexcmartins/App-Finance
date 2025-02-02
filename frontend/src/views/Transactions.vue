@@ -84,7 +84,7 @@ export default {
     async carregarTransacoes() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://192.168.0.26:5000/transactions", {
+        const response = await fetch("http://localhost:5000/transactions", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await response.json();
@@ -101,7 +101,7 @@ export default {
     async adicionarTransacao() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://192.168.0.26:5000/transactions", {
+        const response = await fetch("http://localhost:5000/transactions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

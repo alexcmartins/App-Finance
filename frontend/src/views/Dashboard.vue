@@ -1,6 +1,6 @@
 <template>
     <div class="p-6">
-      <h2 class="text-2xl font-semibold mb-4">Dashboard Financeiro</h2>
+      <h2 class="text-2xl font-semibold mb-4">Dashboard</h2>
   
       <!-- Cards de Resumo -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -19,14 +19,14 @@
       </div>
   
       <!-- Gráficos -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10px">
         <div class="bg-white p-4 rounded-lg shadow-md">
           <h3 class="text-lg font-semibold text-center">Fluxo de Caixa</h3>
-          <LineChart :chart-data="fluxoCaixaData" :chart-options="chartOptions" />
+          <LineChart v-if="fluxoCaixaData.datasets.length > 0" :chart-data="fluxoCaixaData" :chart-options="chartOptions" />
         </div>
-        <div class="bg-white p-4 rounded-lg shadow-md">
+        <div class="bg-white p-4 rounded-lg shadow-md mt-10px">
           <h3 class="text-lg font-semibold text-center">Comparação de Receitas vs Despesas</h3>
-          <BarChart :chart-data="comparacaoReceitasDespesasData" :chart-options="chartOptions" />
+          <BarChart v-if="comparacaoReceitasDespesasData.datasets.length > 0" :chart-data="comparacaoReceitasDespesasData" :chart-options="chartOptions" />
         </div>
       </div>
     </div>
@@ -34,10 +34,10 @@
   
   <script>
   import { LineChart, BarChart } from 'vue-chart-3';
-  import { Chart as ChartJS, Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement } from 'chart.js';
+  import { Chart as ChartJS, Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, LineController, BarController } from 'chart.js';
   
   // Registrando os componentes do Chart.js
-  ChartJS.register(Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
+  ChartJS.register(Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, LineController, BarController);
   
   export default {
     components: {
@@ -49,8 +49,8 @@
         saldoAtual: 0,
         receitasTotais: 0,
         despesasTotais: 0,
-        fluxoCaixaData: null,
-        comparacaoReceitasDespesasData: null,
+        fluxoCaixaData: { labels: [], datasets: [] },  // Inicializado como objeto vazio
+        comparacaoReceitasDespesasData: { labels: [], datasets: [] },  // Inicializado como objeto vazio
         chartOptions: {
           responsive: true,
           plugins: {
@@ -66,7 +66,7 @@
       async carregarDados() {
         try {
           const token = localStorage.getItem("token");
-          const response = await fetch("http://192.168.0.26:5000/dashboard", {
+          const response = await fetch("http://localhost:5000/dashboard", {
             headers: { Authorization: `Bearer ${token}` }
           });
           const data = await response.json();
@@ -83,7 +83,6 @@
         }
       },
       atualizarGraficos() {
-        // Simulação de dados para gráfico de fluxo de caixa
         this.fluxoCaixaData = {
           labels: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"],
           datasets: [

@@ -1,12 +1,30 @@
-<template>
+<!--<template>
   <div class="flex h-screen">
-    <!-- Sidebar -->
+     Área Principal 
+    <div class="flex flex-col flex-initial transition-all"
+        :class="{ 'ml-40': isAuthenticated && !collapsed, 'ml-20': isAuthenticated && collapsed }">
+      
+      Sidebar (Aparece Apenas Quando Logado) 
+      <Sidebar v-if="isAuthenticated" :collapsed="collapsed" @toggle="collapsed = !collapsed" />
+      
+    </div>
+    <div class="flex flex-col w-100 flex-auto transition-all"
+        :class="{ 'ml-80': isAuthenticated && !collapsed, 'ml-60': isAuthenticated && collapsed }">
+      <main class="p-6 bg-gray-100 flex-auto transition-all">
+        <router-view />
+      </main>
+    </div>
+  </div>
+</template>-->
+
+<template>
+  <div class="flex flex-col md:flex-row h-screen">
+    <!-- Sidebar (Ele se ajusta automaticamente para mobile/desktop) -->
     <Sidebar v-if="isAuthenticated" />
-    <div class="flex-1 flex flex-col">
-      <!-- Header -->
-      <Header v-if="isAuthenticated" />
-      <!-- Conteúdo principal -->
-      <main class="p-6 bg-gray-100 flex-1">
+
+    <!-- Área Principal -->
+    <div class="flex-auto bg-gray-100 transition-all">
+      <main class="p-6">
         <router-view />
       </main>
     </div>
@@ -15,18 +33,24 @@
 
 <script>
 import Sidebar from "@/components/Sidebar.vue";
-import Header from "@/components/Header.vue";
 import { useUserStore } from "@/store/user";
+import { storeToRefs } from "pinia";
 
 export default {
   components: {
-    Sidebar,
-    Header,
+    Sidebar
+  },
+  data() {
+    return {
+      collapsed: false // Agora o App.vue controla o estado do Sidebar
+    };
   },
   setup() {
     const userStore = useUserStore();
+    const { isAuthenticated } = storeToRefs(userStore);
+
     return {
-      isAuthenticated: userStore.isAuthenticated // Pegando a autenticação do Pinia
+      isAuthenticated
     };
   },
   async mounted() {
@@ -42,7 +66,7 @@ export default {
       const data = await response.json();
       if (response.ok) {
         const userStore = useUserStore();
-        userStore.setUser(data.username, token); // Atualiza o estado do usuário
+        userStore.setUser(data.username, token);
       }
     } catch (error) {
       console.error('Erro ao carregar usuário:', error);
