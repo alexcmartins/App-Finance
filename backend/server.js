@@ -1,5 +1,3 @@
-// backend/server.js
-
 const express = require('express');
 const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
@@ -9,6 +7,7 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
+const host = process.env.SERVER_HOST || '0.0.0.0';
 
 app.use(cors());
 app.use(express.json());
@@ -108,8 +107,14 @@ app.post('/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
-    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    // Criar token JWT com ID e username do usuário
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({ token, id: user.id, username: user.username }); // Agora retorna o username
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao fazer login' });
@@ -150,6 +155,18 @@ app.post('/transactions', authenticateToken, async (req, res) => {
   }
 });
 
+app.get('/me', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, { attributes: ['id', 'username'] });
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    res.json({ id: user.id, username: user.username });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao obter dados do usuário' });
+  }
+});
+
+
 app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+  console.log(`Servidor rodando na porta ${host}:${port}`);
 });
