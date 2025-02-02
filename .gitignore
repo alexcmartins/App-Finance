@@ -1,0 +1,6 @@
+#Dependecies
+node_modules
+
+#misc
+.env.local
+.env
