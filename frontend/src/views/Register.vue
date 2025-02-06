@@ -29,7 +29,8 @@
     methods: {
       async register() {
         try {
-          const response = await fetch('http://localhost:5000/register', {
+          const API_URL = import.meta.env.VITE_API_URL || "http://financeapp-backend:5000";
+          const response = await fetch(`${API_URL}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: this.username, password: this.password })

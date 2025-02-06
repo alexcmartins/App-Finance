@@ -70,7 +70,7 @@ const Transaction = sequelize.define('Transaction', {
 });
 
 // Sincronizar modelos com o banco de dados
-sequelize.sync()
+sequelize.sync({ alter: true })
   .then(() => console.log('Banco de dados sincronizado'))
   .catch(err => console.error('Erro ao sincronizar banco:', err));
 
