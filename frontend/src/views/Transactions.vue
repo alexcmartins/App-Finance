@@ -57,6 +57,8 @@
 </template>
 
 <script>
+import { API_URL } from '../config';
+
 export default {
   data() {
     return {
@@ -84,7 +86,8 @@ export default {
     async carregarTransacoes() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5000/transactions", {
+        
+        const response = await fetch(`${API_URL}/transactions`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await response.json();

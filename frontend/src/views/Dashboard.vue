@@ -35,7 +35,8 @@
   <script>
   import { LineChart, BarChart } from 'vue-chart-3';
   import { Chart as ChartJS, Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, LineController, BarController } from 'chart.js';
-  
+  import { API_URL } from '../config';
+
   // Registrando os componentes do Chart.js
   ChartJS.register(Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, LineController, BarController);
   
@@ -66,7 +67,8 @@
       async carregarDados() {
         try {
           const token = localStorage.getItem("token");
-          const response = await fetch("http://localhost:5000/dashboard", {
+          
+          const response = await fetch(`${API_URL}/dashboard`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const data = await response.json();

@@ -18,6 +18,8 @@
   </template>
   
   <script>
+  import { API_URL } from '../config';
+
   export default {
     data() {
       return {
@@ -29,7 +31,7 @@
     methods: {
       async register() {
         try {
-          const API_URL = import.meta.env.VITE_API_URL || "http://financeapp-backend:5000";
+          
           const response = await fetch(`${API_URL}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

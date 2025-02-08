@@ -19,6 +19,7 @@
 
 <script>
 import { useUserStore } from '../store/user';
+import { API_URL } from '../config';
 
 export default {
   data() {
@@ -31,7 +32,7 @@ export default {
   methods: {
     async login() {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://financeapp-backend:5000";
+        
         const response = await fetch(`${API_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

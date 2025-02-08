@@ -30,12 +30,12 @@ services:
     environment:
       - NODE_ENV=production
       - DB_USER=admin
-      - DB_HOST=192.168.1.100  # 🔹 IP fixo do PostgreSQL
+      - DB_HOST=financeapp-db  # 🔹 Use o nome do container do PostgreSQL
       - DB_NAME=app_finance
       - DB_PASS=Al253900
       - DB_PORT=5432
       - JWT_SECRET=01a9fd0eaeafa451d8f0d24d91e30c95af14b02413d62c2101a67264343627ee
-      - SERVER_HOST=192.168.1.101
+      - SERVER_HOST=financeapp-backend
     depends_on:
       - db
     networks:
@@ -45,8 +45,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        VITE_API_URL: /api
     container_name: financeapp-frontend
     ports:
       - "8080:80"
