@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { isAuthenticated, validateToken } from "@/services/auth";
 import Login from './views/Login.vue';
 import Register from './views/Register.vue';
 import Dashboard from './views/Dashboard.vue';
@@ -44,11 +45,18 @@ const router = createRouter({
 });
 
 // Middleware para proteger rotas autenticadas
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('token'); // Verifica se o token está armazenado
-
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login'); // Redireciona para login se não estiver autenticado
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.requiresAuth) {
+    if (!isAuthenticated()) {
+      next("/login");
+    } else {
+      const isValid = await validateToken();
+      if (!isValid) {
+        next("/login");
+      } else {
+        next();
+      }
+    }
   } else {
     next();
   }

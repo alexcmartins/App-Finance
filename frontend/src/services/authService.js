@@ -1,3 +1,4 @@
+/*
 import config from '../config';
 
 export function login(credentials) {
@@ -14,4 +15,4 @@ export function login(credentials) {
         }
         return response.json();
     });
-}
+}*/

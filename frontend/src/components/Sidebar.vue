@@ -71,6 +71,7 @@
       >
       <span v-html="item.icon"></span>
       </button>
+      <button @click="logout" class="bg-red-500 px-3 py-1 rounded hover:bg-red-700">🚪</button>
     </div>
   </div>
 </template>

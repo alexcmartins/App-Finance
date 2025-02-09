@@ -2,14 +2,22 @@
   <div class="p-6">
     <h2 class="text-2xl font-semibold mb-4">Transações</h2>
 
-    <!-- Filtro -->
-    <div class="mb-4">
-      <label class="mr-2">Filtrar:</label>
-      <select v-model="filtro" class="p-2 border rounded">
-        <option value="">Todas</option>
-        <option value="entrada">Entradas</option>
-        <option value="saida">Saídas</option>
-      </select>
+    <!-- Botão para Adicionar Nova Transação -->
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <label class="mr-2">Filtrar:</label>
+        <select v-model="filtro" class="p-2 border rounded">
+          <option value="">Todas</option>
+          <option value="entrada">Entradas</option>
+          <option value="saida">Saídas</option>
+        </select>
+      </div>
+      <button
+        @click="toggleForm"
+        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+      >
+        {{ showForm ? "Fechar Formulário" : "+ Nova Transação" }}
+      </button>
     </div>
 
     <!-- Lista de Transações -->
@@ -18,6 +26,7 @@
         <tr class="bg-gray-200">
           <th class="border p-2">Data</th>
           <th class="border p-2">Descrição</th>
+          <th class="border p-2">Categoria</th>
           <th class="border p-2">Valor</th>
           <th class="border p-2">Tipo</th>
         </tr>
@@ -26,111 +35,129 @@
         <tr v-for="transacao in transacoesFiltradas" :key="transacao.id" class="border-b">
           <td class="border p-2">{{ formatarData(transacao.data) }}</td>
           <td class="border p-2">{{ transacao.descricao }}</td>
+          <td class="border p-2">{{ transacao.categoria }}</td>
           <td class="border p-2">{{ formatarValor(transacao.valor) }}</td>
           <td class="border p-2">
             <span :class="transacao.tipo === 'entrada' ? 'text-green-500' : 'text-red-500'">
               {{ transacao.tipo }}
             </span>
           </td>
+          <td class="border p-2 flex gap-2">
+            <button @click="editTransaction(transacao)" class="text-blue-500">✏️</button>
+          </td>
         </tr>
       </tbody>
     </table>
 
-    <!-- Formulário para Adicionar Transação -->
-    <h3 class="text-xl font-semibold mt-6">Nova Transação</h3>
-    <form @submit.prevent="adicionarTransacao" class="mt-4">
-      <input v-model="novaTransacao.descricao" type="text" placeholder="Descrição" class="p-2 border rounded w-full mb-2" required />
-      <input v-model="novaTransacao.valor" type="number" placeholder="Valor" class="p-2 border rounded w-full mb-2" required />
-      <select v-model="novaTransacao.tipo" class="p-2 border rounded w-full mb-2" required>
-        <option value="">Selecione o Tipo</option>
-        <option value="entrada">Entrada</option>
-        <option value="saida">Saída</option>
-      </select>
-      <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-        Adicionar Transação
-      </button>
-    </form>
-
-    <p v-if="mensagem" class="text-green-500 mt-4">{{ mensagem }}</p>
-    <p v-if="erro" class="text-red-500 mt-4">{{ erro }}</p>
+    <!-- Formulário de Transação -->
+    <TransactionForm
+      v-if="showForm"
+      :categorias="categorias"
+      :transaction="transactionToEdit"
+      @addTransaction="adicionarTransacao"
+      @updateTransaction="updateTransaction"
+      @cancelEdit="cancelEdit"
+    />
   </div>
 </template>
 
 <script>
-import { API_URL } from '../config';
+//import { API_URL } from "../config";
+import { fetchWithAuth } from "@/services/api";
+import TransactionForm from "@/components/TransactionForm.vue";
 
 export default {
+  components: {
+    TransactionForm,
+  },
   data() {
     return {
       transacoes: [],
+      categorias: [],
       filtro: "",
-      novaTransacao: {
-        descricao: "",
-        valor: "",
-        tipo: ""
-      },
-      mensagem: "",
-      erro: ""
+      showForm: false,
+      transactionToEdit: null,
     };
   },
   computed: {
     transacoesFiltradas() {
       if (!this.filtro) return this.transacoes;
-      return this.transacoes.filter(t => t.tipo === this.filtro);
-    }
+      return this.transacoes.filter((t) => t.tipo === this.filtro);
+    },
   },
   async mounted() {
     await this.carregarTransacoes();
+    await this.carregarCategorias();
   },
   methods: {
     async carregarTransacoes() {
       try {
-        const token = localStorage.getItem("token");
-        
-        const response = await fetch(`${API_URL}/transactions`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await response.json();
-
-        if (response.ok) {
-          this.transacoes = data;
-        } else {
-          throw new Error(data.error || "Erro ao carregar transações");
-        }
+        this.transacoes = await fetchWithAuth("/transactions"); // 🔥 Já retorna JSON
       } catch (error) {
-        this.erro = error.message;
+        console.error("Erro ao carregar transações:", error);
       }
     },
-    async adicionarTransacao() {
+
+    async carregarCategorias() {
       try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5000/transactions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(this.novaTransacao)
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Erro ao adicionar transação");
-
-        this.mensagem = "Transação adicionada com sucesso!";
-        this.erro = "";
-        this.novaTransacao = { descricao: "", valor: "", tipo: "" };
-        await this.carregarTransacoes(); // Atualiza a lista
+        const settings = await fetchWithAuth("/settings"); // 🔥 Já retorna JSON
+        this.categorias = settings.categories || [];
       } catch (error) {
-        this.erro = error.message;
+        console.error("Erro ao carregar categorias:", error);
       }
     },
+
+    async adicionarTransacao(transaction) {
+      try {
+        await fetchWithAuth("/transactions", {
+          method: "POST",
+          body: JSON.stringify(transaction),
+        });
+
+        this.showForm = false;
+        await this.carregarTransacoes();
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async updateTransaction(transaction) {
+      try {
+        await fetchWithAuth(`/transactions/${transaction.id}`, {
+          method: "PUT",
+          body: JSON.stringify(transaction),
+        });
+
+        this.showForm = false;
+        await this.carregarTransacoes();
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    editTransaction(transaction) {
+      this.transactionToEdit = transaction;
+      this.showForm = true;
+    },
+
+    toggleForm() {
+      this.transactionToEdit = null;
+      this.showForm = !this.showForm;
+    },
+
+    cancelEdit() {
+      this.transactionToEdit = null;
+      this.showForm = false;
+    },
+
     formatarData(data) {
       return new Date(data).toLocaleDateString();
     },
+
     formatarValor(valor) {
       return `R$ ${parseFloat(valor).toFixed(2).replace(".", ",")}`;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -139,7 +166,8 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
-th, td {
+th,
+td {
   border: 1px solid #ccc;
   padding: 8px;
   text-align: left;

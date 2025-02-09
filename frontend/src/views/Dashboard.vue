@@ -35,7 +35,8 @@
   <script>
   import { LineChart, BarChart } from 'vue-chart-3';
   import { Chart as ChartJS, Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, LineController, BarController } from 'chart.js';
-  import { API_URL } from '../config';
+  //import { API_URL } from '../config';
+  import { fetchWithAuth } from "@/services/api";
 
   // Registrando os componentes do Chart.js
   ChartJS.register(Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, LineController, BarController);
@@ -66,19 +67,12 @@
     methods: {
       async carregarDados() {
         try {
-          const token = localStorage.getItem("token");
-          
-          const response = await fetch(`${API_URL}/dashboard`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const data = await response.json();
-  
-          if (!response.ok) throw new Error(data.error || "Erro ao carregar dados financeiros");
-  
+          const data = await fetchWithAuth("/dashboard"); // 🔥 Agora `data` já é um JSON válido
+
           this.saldoAtual = data.saldo_atual;
           this.receitasTotais = data.total_receitas;
           this.despesasTotais = data.total_despesas;
-  
+        
           this.atualizarGraficos();
         } catch (error) {
           console.error("Erro ao carregar dados:", error.message);
