@@ -9,6 +9,7 @@ const transactionRoutes = require("./routes/transactionRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 
+
 // Middleware de autenticação
 const { authenticateToken } = require("./middleware/authMiddleware");
 

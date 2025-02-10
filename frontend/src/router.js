@@ -44,6 +44,7 @@ const router = createRouter({
   routes
 });
 
+/*
 // Middleware para proteger rotas autenticadas
 router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth) {
@@ -57,6 +58,17 @@ router.beforeEach(async (to, from, next) => {
         next();
       }
     }
+  } else {
+    next();
+  }
+});*/
+
+// Middleware de proteção de rota
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem("token");
+
+  if (to.meta.requiresAuth && !token) {
+    next("/login"); // Redireciona para login se não estiver autenticado
   } else {
     next();
   }
